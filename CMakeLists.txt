@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(goosestd LANGUAGES CXX)
+project(gooselib LANGUAGES CXX)
 
-add_library(goosestd INTERFACE)
+add_library(gooselib INTERFACE)
 set (CMAKE_CXX_STANDARD 17)
 
-target_include_directories(goosestd INTERFACE include)
+target_include_directories(gooselib INTERFACE include)

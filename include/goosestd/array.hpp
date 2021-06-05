@@ -151,4 +151,7 @@ namespace goose {
         public:
             T _m_elems[N];
     };
+
+    template<typename T, typename... U>
+    array(T, U...) -> array<T, sizeof...(U) + 1>;
 }

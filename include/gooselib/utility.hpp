@@ -1,8 +1,10 @@
 #pragma once
 
+#include "type_traits.hpp"
+
 namespace goose {
     struct numrange {
-        
+       // TODO 
     };
 
     template<class T>
@@ -11,4 +13,7 @@ namespace goose {
         b = a;
         a = temp;
     }
+
+    template<class T>
+    add_rvalue_reference_t<T> declval() noexcept;
 }

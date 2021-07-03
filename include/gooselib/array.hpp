@@ -3,7 +3,6 @@
 #include "utility.hpp"
 #include "iterator.hpp"
 #include "algorithm.hpp"
-#include <algorithm>
 
 namespace goose {
     template<typename T, size_t N>
@@ -37,6 +36,26 @@ namespace goose {
 
             _Array_iterator operator+(difference_type n) const {
                 return {m_ptr + n};
+            }
+            
+            _Array_iterator& operator--() {
+                --m_ptr;
+                return *this;
+            }
+
+            _Array_iterator operator--(int) {
+                auto tmp = *this;
+                --m_ptr;
+                return tmp;
+            }
+
+            _Array_iterator& operator-=(difference_type n) {
+                m_ptr -= n;
+                return *this;
+            }
+
+            _Array_iterator operator-(difference_type n) const {
+                return {m_ptr - n};
             }
 
         public:

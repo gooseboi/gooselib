@@ -1,7 +1,10 @@
 #pragma once
 
+#include "type_traits.hpp"
+#include "utility.hpp"
 #include <cstddef>
 #include <type_traits>
+#include <utility>
 
 namespace goose {
     namespace _implementation {
@@ -23,6 +26,15 @@ namespace goose {
 
         template<typename Tp, typename Up>
         using replace_first_arg_t = typename replace_first_arg<Tp, Up>::type;
+    }
+    
+    template<typename T, typename... Args>
+    T* construct_at(T* ptr, Args&&... args) {
+        return new (const_cast<void*>(static_cast<const volatile void*>(ptr)))T(std::forward<Args>(args)...);
+    }
+    template<typename T>
+    void construct_at(T* ptr) {
+        ptr->~T();
     }
 
     template<typename Ptr>
@@ -79,7 +91,39 @@ namespace goose {
             template<typename Tp>
             using _difference_type = typename Tp::difference_type;
             template<typename Tp>
-            using _size_type = typename Tp::size_type;
+            using _size_type = typename Tp::size_type;    
+            
+            template<typename Tp, typename... Args>
+            struct _construct_helper {
+                template<typename Alloc2,
+                typename = decltype(std::declval<Alloc2*>()->construct(
+                std::declval<Tp*>(), std::declval<Args>()...))>
+                static true_type _test(int);
+
+                template<typename>
+                static false_type _test(...);
+
+                using type = decltype(_test<Alloc>(0));
+            };
+
+            template<typename Tp, typename... Args>
+            using _has_construct = typename _construct_helper<Tp, Args...>::type;
+
+            template<typename Tp>
+            struct _destroy_helper {
+                template<typename Alloc2,
+                typename = decltype(std::declval<Alloc2*>()->destroy(
+                std::declval<Tp*>()))>
+                static true_type _test(int);
+
+                template<typename>
+                static false_type _test(...);
+
+                using type = decltype(_test<Alloc>(0));
+            };
+
+            template<typename Tp>
+            using _has_destroy = typename _destroy_helper<Tp>::type;
         public:
             using allocator_type = Alloc;
             using value_type = typename Alloc::value_type;
@@ -89,5 +133,22 @@ namespace goose {
             using const_void_pointer = detected_or_t<typename pointer_traits<pointer>::rebind<const void>, _const_void_pointer, Alloc>;
             using difference_type = detected_or_t<typename pointer_traits<pointer>::difference_type, _difference_type, Alloc>;
             using size_type = detected_or_t<std::make_unsigned_t<difference_type>, _size_type, Alloc>;
+        public:
+            static pointer allocate(Alloc& alloc, size_type size) { return alloc.allocate(size); }
+            static void deallocate(Alloc& alloc, pointer ptr, size_type size) { alloc.deallocate(ptr, size); }
+            template<typename T, typename... Args> static void construct(Alloc& alloc, T* ptr, Args&&... args) { 
+                if constexpr(_has_construct<T, Args...>::value) {
+                    alloc.construct(ptr, std::forward<Args>(args)...); 
+                } else {
+                    construct_at(ptr, std::forward<Args>(args)...);
+                }
+            }
+            template<typename T> static void destroy(Alloc& alloc, T* ptr) { 
+                if constexpr(_has_destroy<T>::value) {
+                    alloc.destroy(ptr); 
+                } else {
+                    destroy_at(ptr);
+                }
+            }
     };
 }

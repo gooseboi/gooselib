@@ -106,4 +106,13 @@ namespace goose {
     
     template<typename D, template<typename...> class Op, typename... Args>
     using detected_or_t = typename detected_or<D, Op, Args...>::type;
+
+    template<typename T, typename U>
+    struct is_same : false_type {};
+
+    template<typename T>
+    struct is_same<T, T> : true_type {};
+
+    template<typename T, typename U>
+    inline constexpr bool is_same_v = is_same<T, U>::value;
 }

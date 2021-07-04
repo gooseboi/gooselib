@@ -10,52 +10,52 @@ namespace goose {
         public:
             optional() noexcept = default;
 
-            optional(const T& val) : m_has_value{true} {
-                construct_emplace(val);
+            optional(const T& val) : mHasValue{true} {
+                constructEmplace(val);
             }
 
-            optional(T&& val) : m_has_value{true} { 
-                construct_emplace(std::move(val));
+            optional(T&& val) : mHasValue{true} { 
+                constructEmplace(std::move(val));
             }
 
             template<typename U>
-            optional(const U& val) : m_has_value{true} {
-                construct_emplace(val);
+            optional(const U& val) : mHasValue{true} {
+                constructEmplace(val);
             }
 
             optional(const optional& other) {
                 if (other) {
-                    construct_emplace(*other);
-                    m_has_value = true;
+                    constructEmplace(*other);
+                    mHasValue = true;
                 } 
             }
 
             optional(optional&& other) {
                 if (other) {
-                    construct_emplace(std::move(*other));
-                    m_has_value = true;
+                    constructEmplace(std::move(*other));
+                    mHasValue = true;
                 } 
             }               
 
             template<typename U>
             optional(const optional<U>& other) {
                 if (other) {
-                    construct_emplace(*other);
-                    m_has_value = true;
+                    constructEmplace(*other);
+                    mHasValue = true;
                 } 
             }
 
             template<typename U>
             optional(optional<U>&& other) {
                 if (other) {
-                    construct_emplace(std::move(*other));
-                    m_has_value = true;
+                    constructEmplace(std::move(*other));
+                    mHasValue = true;
                 } 
             }
 
             template<typename... Args>
-            optional(std::in_place_t, Args&&... args) : m_has_value{true} {
-               construct_emplace(std::forward<Args>(args)...);
+            optional(std::in_place_t, Args&&... args) : mHasValue{true} {
+               constructEmplace(std::forward<Args>(args)...);
             }
 
             optional& operator=(const optional& other) {
@@ -64,9 +64,9 @@ namespace goose {
                     if (*this) {
                         **this = *other;
                     } else {
-                        construct_emplace(*other);
+                        constructEmplace(*other);
                     }
-                    m_has_value = true;
+                    mHasValue = true;
                 } else {
                     clear();
                 }
@@ -79,9 +79,9 @@ namespace goose {
                     if (*this) {
                         **this = std::move(*other);
                     } else {
-                        construct_emplace(std::move(*other));
+                        constructEmplace(std::move(*other));
                     }
-                    m_has_value = true;
+                    mHasValue = true;
                 } else {
                     clear();
                 }
@@ -95,9 +95,9 @@ namespace goose {
                     if (*this) {
                         **this = *other;
                     } else {
-                        construct_emplace(*other);
+                        constructEmplace(*other);
                     }
-                    m_has_value = true;
+                    mHasValue = true;
                 } else {
                     clear();
                 }
@@ -111,9 +111,9 @@ namespace goose {
                     if (*this) {
                         **this = std::move(*other);
                     } else {
-                        construct_emplace(std::move(*other));
+                        constructEmplace(std::move(*other));
                     }
-                    m_has_value = true;
+                    mHasValue = true;
                 } else {
                     clear();
                 }
@@ -127,31 +127,31 @@ namespace goose {
         public:
             [[nodiscard]] T& operator*() { return value(); }
             [[nodiscard]] const T& operator*() const { return value(); }
-            [[nodiscard]] T& value() { return *reinterpret_cast<T*>(&m_buffer); }
-            [[nodiscard]] const T& value() const { return *reinterpret_cast<const T*>(&m_buffer); }
+            [[nodiscard]] T& value() { return *reinterpret_cast<T*>(&mBuffer); }
+            [[nodiscard]] const T& value() const { return *reinterpret_cast<const T*>(&mBuffer); }
 
-            bool has_value() const {
-                return m_has_value;
+            bool hasValue() const {
+                return mHasValue;
             }
 
             operator bool() const {
-                return has_value();
+                return hasValue();
             }
 
             void clear() {
-                if (m_has_value) {
+                if (mHasValue) {
                     this->value().~T();
-                    m_has_value = false;
+                    mHasValue = false;
                 }
             }
 
         private:
             template<typename... Args>
-            void construct_emplace(Args&& ... args) {
-                new(m_buffer) T(std::forward<Args>(args)...);
+            void constructEmplace(Args&& ... args) {
+                construct_at(mBuffer);
             }
         private:
-            alignas(T) byte m_buffer[sizeof(T)]{};
-            bool m_has_value{false};
+            alignas(T) std::byte mBuffer[sizeof(T)]{};
+            bool mHasValue{false};
     };
 }

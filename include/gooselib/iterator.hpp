@@ -4,38 +4,38 @@
 #include "type_traits.hpp"
 
 namespace goose {
-    struct input_iterator_tag { };
-    struct output_iterator_tag { };
-    struct forward_iterator_tag : public input_iterator_tag { };
-    struct bidirectional_iterator_tag : public forward_iterator_tag { };
-    struct random_access_iterator_tag : public bidirectional_iterator_tag { };
-    struct contiguous_iterator_tag: public random_access_iterator_tag { };
+    struct inputIteratorTag { };
+    struct outputIteratorTag { };
+    struct forwardIteratorTag : public inputIteratorTag { };
+    struct bidirectionalIteratorTag : public forwardIteratorTag { };
+    struct randomAccessIteratorTag : public bidirectionalIteratorTag { };
+    struct contiguousIteratorTag: public randomAccessIteratorTag { };
 
     template<typename Iter>
-    struct iterator_traits {
-        using difference_type = typename Iter::difference_type;
-        using value_type = typename Iter::value_type;
+    struct iteratorTraits {
+        using differenceType = typename Iter::differenceType;
+        using valueType = typename Iter::valueType;
         using pointer = typename Iter::pointer;
         using reference = typename Iter::reference;
-        using iterator_category = typename Iter::iterator_category;
+        using iteratorCategory = typename Iter::iteratorCategory;
     };
 
     template<typename T>
-    struct iterator_traits<T*> {
-        using difference_type = std::ptrdiff_t;
-        using value_type = remove_cv_t<T>;
+    struct iteratorTraits<T*> {
+        using differenceType = std::ptrdiff_t;
+        using valueType = removeCV<T>;
         using pointer = T*;
         using reference = T&;
-        using iterator_category = random_access_iterator_tag;
+        using iteratorCategory = randomAccessIteratorTag;
     };
 
     template<typename T>
-    struct iterator_traits<const T*> {
-        using difference_type = std::ptrdiff_t;
-        using value_type = remove_cv_t<T>;
+    struct iteratorTraits<const T*> {
+        using differenceType = std::ptrdiff_t;
+        using valueType = removeCV<T>;
         using pointer = const T*;
         using reference = const T&;
-        using iterator_category = random_access_iterator_tag;
+        using iteratorCategory = randomAccessIteratorTag;
     };
 
     template<typename Begin, typename End>
@@ -54,66 +54,66 @@ namespace goose {
     };
     
     template<typename Begin, typename End = Begin>
-    Range<Begin, End> make_range(Begin begin, End end) noexcept {
+    Range<Begin, End> makeRange(Begin begin, End end) noexcept {
         return {begin, end};
     }
 
     template<typename Iter>
-    struct reverse_iterator {
+    struct reverseIterator {
         public:
-            using iterator_type = Iter;
-            using difference_type = std::ptrdiff_t;
-            using value_type = typename iterator_traits<Iter>::value_type;
-            using pointer = typename iterator_traits<Iter>::pointer;
-            using reference = typename iterator_traits<Iter>::reference;
-            using iterator_category = random_access_iterator_tag;
+            using iteratorType = Iter;
+            using differenceType = std::ptrdiff_t;
+            using valueType = typename iteratorTraits<Iter>::valueType;
+            using pointer = typename iteratorTraits<Iter>::pointer;
+            using reference = typename iteratorTraits<Iter>::reference;
+            using iteratorCategory = randomAccessIteratorTag;
         
         public:
-            reverse_iterator() = default;
-            reverse_iterator(iterator_type _iter) : m_iter{_iter} {}
+            reverseIterator() = default;
+            reverseIterator(iteratorType _iter) : m_iter{_iter} {}
             template<typename U>
-            reverse_iterator(reverse_iterator<U> other) : m_iter{other.base()} {}
+            reverseIterator(reverseIterator<U> other) : m_iter{other.base()} {}
 
             template<typename U>
-            reverse_iterator& operator=(const reverse_iterator<U> &other) {
+            reverseIterator& operator=(const reverseIterator<U> &other) {
                 if (this == &other) return *this;
                 m_iter = other.base();
                 return *this;
             }
 
         public:
-            reverse_iterator& operator++() {
+            reverseIterator& operator++() {
                 --m_iter;
                 return *this;
             }
-            reverse_iterator operator++(int) {
-                reverse_iterator tmp = *this;
+            reverseIterator operator++(int) {
+                reverseIterator tmp = *this;
                 --m_iter;
                 return tmp;
             }
-            reverse_iterator operator+(difference_type n) const {
+            reverseIterator operator+(differenceType n) const {
                 return {m_iter - n};
             }
-            reverse_iterator& operator+=(difference_type n) {
+            reverseIterator& operator+=(differenceType n) {
                 m_iter -= n;
                 return *this;
             }
             
-            reverse_iterator& operator--() {
+            reverseIterator& operator--() {
                 ++m_iter;
                 return *this;
             }
-            reverse_iterator operator--(int) {
-                reverse_iterator tmp = *this;
+            reverseIterator operator--(int) {
+                reverseIterator tmp = *this;
                 ++m_iter;
                 return tmp;
             }
 
-            reverse_iterator operator-(difference_type n) const {
+            reverseIterator operator-(differenceType n) const {
                 return {m_iter + n};
             }
 
-            reverse_iterator operator-=(difference_type n) {
+            reverseIterator operator-=(differenceType n) {
                 m_iter += n;
                 return *this;
             }
@@ -132,32 +132,32 @@ namespace goose {
             }
         public:
             template<typename It2>
-            bool operator==(const reverse_iterator<It2> &other) const {
+            bool operator==(const reverseIterator<It2> &other) const {
                 return this->base() == other.base();
             }
         
             template<typename It2>
-            bool operator!=(const reverse_iterator<It2> &other) const {
+            bool operator!=(const reverseIterator<It2> &other) const {
                 return this->base() != other.base();
             }
         
             template<typename It2>
-            bool operator<(const reverse_iterator<It2> &other) const {
+            bool operator<(const reverseIterator<It2> &other) const {
                 return this->base() < other.base();
             }
         
             template<typename It2>
-            bool operator>(const reverse_iterator<It2> &other) const {
+            bool operator>(const reverseIterator<It2> &other) const {
                 return this->base() > other.base();
             }
         
             template<typename It2>
-            bool operator<=(const reverse_iterator<It2> &other) const {
+            bool operator<=(const reverseIterator<It2> &other) const {
                 return this->base() <= other.base();
             }
         
             template<typename It2>
-            bool operator>=(const reverse_iterator<It2> &other) const {
+            bool operator>=(const reverseIterator<It2> &other) const {
                 return this->base() >= other.base();
             }
 

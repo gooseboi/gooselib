@@ -29,31 +29,31 @@ namespace goose {
     }
     
     template<typename T, typename... Args>
-    T* construct_at(T* ptr, Args&&... args) {
+    T* constructAt(T* ptr, Args&&... args) {
         return new (const_cast<void*>(static_cast<const volatile void*>(ptr)))T(std::forward<Args>(args)...);
     }
     template<typename T>
-    void construct_at(T* ptr) {
+    void destroyAt(T* ptr) {
         ptr->~T();
     }
 
     template<typename Ptr>
-    struct pointer_traits {
+    struct pointerTraits {
         private:
             template<typename Tp>
-            using _element_type = typename Tp::element_type;
+            using _elementType = typename Tp::elementType;
             template<typename Tp>
-            using _difference_type = typename Tp::difference_type;    
+            using _differenceType = typename Tp::differenceType;    
             template<typename Tp, typename Up, typename = void>
             struct _rebind : _implementation::replace_first_arg<Tp, Up> { };
             template<typename Tp, typename Up>
-            struct _rebind<Tp, Up, void_t<typename Tp::template rebind<Up>>>
+            struct _rebind<Tp, Up, voidT<typename Tp::template rebind<Up>>>
             { using type = typename Tp::template rebind<Up>; };
 
         public: 
             using pointer = Ptr;
-            using element_type = detected_or_t<_implementation::get_first_arg_t<Ptr>, _element_type, Ptr>;
-            using difference_type = detected_or_t<std::ptrdiff_t, _difference_type, Ptr>;
+            using elementType = detectedOr<_implementation::get_first_arg_t<Ptr>, _elementType, Ptr>;
+            using differenceType = detectedOr<std::ptrdiff_t, _differenceType, Ptr>;
             template<typename U>
             using rebind = typename _rebind<Ptr, U>::type;
     };
@@ -61,7 +61,7 @@ namespace goose {
     template<typename T>
     struct allocator {
         public:
-            using value_type = T;
+            using valueType = T;
         public:
             constexpr allocator() = default;
             constexpr allocator(const allocator&) = default;
@@ -72,36 +72,36 @@ namespace goose {
         public:
             T* allocate(size_t bufSize) { return reinterpret_cast<T*>(new char[sizeof(T) * bufSize]); }
 
-            void deallocate(T* allocated, size_t allocated_size) {
+            void deallocate(T* allocated, size_t allocatedSize) {
                 delete[] allocated;
             }
     };
 
     template<typename Alloc>
-    struct allocator_traits {
+    struct allocatorTraits {
         private:
             template<typename Tp>
             using _pointer = typename Tp::pointer;
             template<typename Tp>
-            using _const_pointer = typename Tp::const_pointer;   
+            using _constPointer = typename Tp::constPointer;   
             template<typename Tp>
-            using _void_pointer = typename Tp::void_pointer; 
+            using _voidPointer = typename Tp::voidPointer; 
             template<typename Tp>
-            using _const_void_pointer = typename Tp::const_void_pointer; 
+            using _constVoidPointer = typename Tp::constVoidPointer; 
             template<typename Tp>
-            using _difference_type = typename Tp::difference_type;
+            using _differenceType = typename Tp::differenceType;
             template<typename Tp>
-            using _size_type = typename Tp::size_type;    
+            using _sizeType = typename Tp::sizeType;    
             
             template<typename Tp, typename... Args>
             struct _construct_helper {
                 template<typename Alloc2,
                 typename = decltype(std::declval<Alloc2*>()->construct(
                 std::declval<Tp*>(), std::declval<Args>()...))>
-                static true_type _test(int);
+                static trueType _test(int);
 
                 template<typename>
-                static false_type _test(...);
+                static falseType _test(...);
 
                 using type = decltype(_test<Alloc>(0));
             };
@@ -114,10 +114,10 @@ namespace goose {
                 template<typename Alloc2,
                 typename = decltype(std::declval<Alloc2*>()->destroy(
                 std::declval<Tp*>()))>
-                static true_type _test(int);
+                static trueType _test(int);
 
                 template<typename>
-                static false_type _test(...);
+                static falseType _test(...);
 
                 using type = decltype(_test<Alloc>(0));
             };
@@ -125,17 +125,17 @@ namespace goose {
             template<typename Tp>
             using _has_destroy = typename _destroy_helper<Tp>::type;
         public:
-            using allocator_type = Alloc;
-            using value_type = typename Alloc::value_type;
-            using pointer = detected_or_t<value_type*, _pointer, Alloc>;
-            using const_pointer = detected_or_t<typename pointer_traits<pointer>::rebind<const value_type>, _const_pointer, Alloc>;
-            using void_pointer = detected_or_t<typename pointer_traits<pointer>::rebind<void>, _void_pointer, Alloc>;
-            using const_void_pointer = detected_or_t<typename pointer_traits<pointer>::rebind<const void>, _const_void_pointer, Alloc>;
-            using difference_type = detected_or_t<typename pointer_traits<pointer>::difference_type, _difference_type, Alloc>;
-            using size_type = detected_or_t<std::make_unsigned_t<difference_type>, _size_type, Alloc>;
+            using allocatorType = Alloc;
+            using valueType = typename Alloc::valueType;
+            using pointer = detectedOr<valueType*, _pointer, Alloc>;
+            using constPointer = detectedOr<typename pointerTraits<pointer>::rebind<const valueType>, _constPointer, Alloc>;
+            using voidPointer = detectedOr<typename pointerTraits<pointer>::rebind<void>, _voidPointer, Alloc>;
+            using constVoidPointer = detectedOr<typename pointerTraits<pointer>::rebind<const void>, _constVoidPointer, Alloc>;
+            using differenceType = detectedOr<typename pointerTraits<pointer>::differenceType, _differenceType, Alloc>;
+            using sizeType = detectedOr<std::make_unsigned_t<differenceType>, _sizeType, Alloc>;
         public:
-            static pointer allocate(Alloc& alloc, size_type size) { return alloc.allocate(size); }
-            static void deallocate(Alloc& alloc, pointer ptr, size_type size) { alloc.deallocate(ptr, size); }
+            static pointer allocate(Alloc& alloc, sizeType size) { return alloc.allocate(size); }
+            static void deallocate(Alloc& alloc, pointer ptr, sizeType size) { alloc.deallocate(ptr, size); }
             template<typename T, typename... Args> static void construct(Alloc& alloc, T* ptr, Args&&... args) { 
                 if constexpr(_has_construct<T, Args...>::value) {
                     alloc.construct(ptr, std::forward<Args>(args)...); 

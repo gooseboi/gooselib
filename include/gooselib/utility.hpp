@@ -3,7 +3,7 @@
 #include "type_traits.hpp"
 
 namespace goose {
-    struct numrange {
+    struct numRange {
        // TODO 
     };
 
@@ -15,5 +15,5 @@ namespace goose {
     }
 
     template<class T>
-    add_rvalue_reference_t<T> declval() noexcept;
+    addRValueReference<T> declval() noexcept;
 }

@@ -6,112 +6,112 @@
 
 namespace goose {
     template<typename T, size_t N>
-    struct _Array_iterator {
+    struct _arrayIterator {
         public:
-            using value_type = T;
-            using difference_type = std::ptrdiff_t;
+            using valueType = T;
+            using differenceType = std::ptrdiff_t;
             using reference = T&;
             using pointer = T*;
-            using iterator_category = goose::random_access_iterator_tag;
+            using iteratorCategory = goose::randomAccessIteratorTag;
         public:
-            _Array_iterator() noexcept = default;
-            _Array_iterator(pointer _ptr) noexcept : m_ptr{_ptr} {}
+            _arrayIterator() noexcept = default;
+            _arrayIterator(pointer _ptr) noexcept : mPtr{_ptr} {}
 
         public:
-            _Array_iterator& operator++() {
-                ++m_ptr;
+            _arrayIterator& operator++() {
+                ++mPtr;
                 return *this;
             }
 
-            _Array_iterator operator++(int) {
+            _arrayIterator operator++(int) {
                 auto tmp = *this;
-                ++m_ptr;
+                ++mPtr;
                 return tmp;
             }
 
-            _Array_iterator& operator+=(difference_type n) {
-                m_ptr += n;
+            _arrayIterator& operator+=(differenceType n) {
+                mPtr += n;
                 return *this;
             }
 
-            _Array_iterator operator+(difference_type n) const {
-                return {m_ptr + n};
+            _arrayIterator operator+(differenceType n) const {
+                return {mPtr + n};
             }
             
-            _Array_iterator& operator--() {
-                --m_ptr;
+            _arrayIterator& operator--() {
+                --mPtr;
                 return *this;
             }
 
-            _Array_iterator operator--(int) {
+            _arrayIterator operator--(int) {
                 auto tmp = *this;
-                --m_ptr;
+                --mPtr;
                 return tmp;
             }
 
-            _Array_iterator& operator-=(difference_type n) {
-                m_ptr -= n;
+            _arrayIterator& operator-=(differenceType n) {
+                mPtr -= n;
                 return *this;
             }
 
-            _Array_iterator operator-(difference_type n) const {
-                return {m_ptr - n};
+            _arrayIterator operator-(differenceType n) const {
+                return {mPtr - n};
             }
 
         public:
-            bool operator==(const _Array_iterator &other) const {
-                return m_ptr == other.m_ptr;
+            bool operator==(const _arrayIterator &other) const {
+                return mPtr == other.mPtr;
             }
 
-            bool operator!=(const _Array_iterator &other) const {
+            bool operator!=(const _arrayIterator &other) const {
                 return !(*this == other);
             }
         
         public:
             T& operator*() const {
-                return *m_ptr;
+                return *mPtr;
             }
             T* operator->() const {
-                return m_ptr;
+                return mPtr;
             }
         private:            
-        T* m_ptr;
+        T* mPtr;
     };
 
     template<typename T, size_t N>
     struct array {
         public:
-            using value_type = T;
-            using size_type = size_t;
-            using reference = value_type&;
-            using const_reference = const value_type&;
-            using pointer = value_type*;
-            using const_pointer = const value_type*;
-            using iterator = _Array_iterator<T, N>;
-            using const_iterator = _Array_iterator<const T, N>;
-            using reverse_iterator = goose::reverse_iterator<iterator>;
-            using const_reverse_iterator = goose::reverse_iterator<const_iterator>;
+            using valueType = T;
+            using sizeType = size_t;
+            using reference = valueType&;
+            using constReference = const valueType&;
+            using pointer = valueType*;
+            using constPointer = const valueType*;
+            using iterator = _arrayIterator<T, N>;
+            using constIterator = _arrayIterator<const T, N>;
+            using reverseIterator = goose::reverseIterator<iterator>;
+            using constReverseIterator = goose::reverseIterator<constIterator>;
         public:
-            constexpr reference operator[](size_t pos) noexcept { return _m_elems[pos]; }
-            constexpr const_reference operator[](size_t pos) const noexcept { return _m_elems[pos]; }
-            constexpr reference at(size_t pos) noexcept { return _m_elems[pos]; }
-            constexpr const_reference at(size_t pos) const noexcept { return _m_elems[pos]; }
+            constexpr reference operator[](size_t pos) noexcept { return _mElems[pos]; }
+            constexpr constReference operator[](size_t pos) const noexcept { return _mElems[pos]; }
+            constexpr reference at(size_t pos) noexcept { return _mElems[pos]; }
+            constexpr constReference at(size_t pos) const noexcept { return _mElems[pos]; }
             
-            constexpr reference front() noexcept { return _m_elems[0]; }
-            constexpr const_reference front() const noexcept { return _m_elems[0]; }
+            constexpr reference front() noexcept { return _mElems[0]; }
+            constexpr constReference front() const noexcept { return _mElems[0]; }
         
-            constexpr reference back() noexcept { return _m_elems[this->size()]; }
-            constexpr const_reference back() const noexcept { return _m_elems[this->size()]; }
+            constexpr reference back() noexcept { return _mElems[this->size()]; }
+            constexpr constReference back() const noexcept { return _mElems[this->size()]; }
         
-            constexpr pointer data(size_t pos) noexcept { return _m_elems; }
-            constexpr const_pointer data(size_t pos) const noexcept { return _m_elems; }
+            constexpr pointer data(size_t pos) noexcept { return _mElems; }
+            constexpr constPointer data(size_t pos) const noexcept { return _mElems; }
 
         public:
-            constexpr size_type size() const noexcept { return N; }
-            constexpr size_type empty() const noexcept { return N == 0; }
+            constexpr sizeType size() const noexcept { return N; }
+            constexpr sizeType empty() const noexcept { return N == 0; }
 
         public: 
-            void fill(const_reference val) noexcept {
+            void fill(constReference val) noexcept {
                 for (auto &i : *this) {
                     i = val;
                 }
@@ -123,25 +123,25 @@ namespace goose {
             }
         
         public:
-            constexpr iterator begin() noexcept { return _m_elems; }
-            constexpr const_iterator begin() const noexcept { return cbegin(); }
-            constexpr const_iterator cbegin() const noexcept { return _m_elems; }
+            constexpr iterator begin() noexcept { return _mElems; }
+            constexpr constIterator begin() const noexcept { return cbegin(); }
+            constexpr constIterator cbegin() const noexcept { return _mElems; }
 
-            constexpr iterator end() noexcept { return _m_elems + this->size(); }
-            constexpr const_iterator end() const noexcept { return cend(); }
-            constexpr const_iterator cend() const noexcept { return _m_elems + this->size(); }
+            constexpr iterator end() noexcept { return _mElems + this->size(); }
+            constexpr constIterator end() const noexcept { return cend(); }
+            constexpr constIterator cend() const noexcept { return _mElems + this->size(); }
 
-            constexpr reverse_iterator rbegin() noexcept { return end(); }
-            constexpr const_reverse_iterator rbegin() const noexcept { return crbegin(); }
-            constexpr const_reverse_iterator crbegin() const noexcept { return cend(); }
+            constexpr reverseIterator rbegin() noexcept { return end(); }
+            constexpr constReverseIterator rbegin() const noexcept { return crbegin(); }
+            constexpr constReverseIterator crbegin() const noexcept { return cend(); }
 
-            constexpr reverse_iterator rend() noexcept { return begin(); }
-            constexpr const_reverse_iterator rend() const noexcept { return crend(); }
-            constexpr const_reverse_iterator crend() const noexcept { return cbegin(); }
+            constexpr reverseIterator rend() noexcept { return begin(); }
+            constexpr constReverseIterator rend() const noexcept { return crend(); }
+            constexpr constReverseIterator crend() const noexcept { return cbegin(); }
 
         public:
             bool operator==(const array &other) const {
-                for (size_type i = 0; i < this->size(); ++i) {
+                for (sizeType i = 0; i < this->size(); ++i) {
                     if((*this)[i] != other[i]) return false;
                 }
                 return true;
@@ -152,7 +152,7 @@ namespace goose {
             }
         
             bool operator<(const array &other) const {
-                return goose::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end());
+                return goose::lexicographicalCompare(this->begin(), this->end(), other.begin(), other.end());
             }
         
             bool operator>(const array &other) const {
@@ -168,7 +168,7 @@ namespace goose {
             }
 
         public:
-            T _m_elems[N];
+            T _mElems[N];
     };
 
     template<typename T, typename... U>

@@ -2,94 +2,94 @@
 
 namespace goose {
     template<typename T>
-    struct remove_const { using type = T; };
+    struct _removeConst { using type = T; };
     
     template<typename T>
-    struct remove_const<const T> { using type = T; };
+    struct _removeConst<const T> { using type = T; };
 
     template<typename T>
-    using remove_const_t = typename remove_const<T>::type;
+    using removeConst = typename _removeConst<T>::type;
 
     template<typename T>
-    struct remove_volatile { using type = T; };
+    struct _removeVolatile { using type = T; };
 
     template<typename T>
-    struct remove_volatile<volatile T> { using type = T; };
+    struct _removeVolatile<volatile T> { using type = T; };
 
     template<typename T>
-    using remove_volatile_t = typename remove_volatile<T>::type;
+    using removeVolatile = typename _removeVolatile<T>::type;
 
     template<typename T>
-    struct remove_cv { using type = remove_const_t<remove_volatile_t<T>>; };
+    struct _removeCV { using type = removeConst<removeVolatile<T>>; };
 
     template<typename T>
-    using remove_cv_t = typename remove_cv<T>::type;
+    using removeCV = typename _removeCV<T>::type;
 
     template<typename T>
-    struct remove_reference { using type = T; };
+    struct _removeReference { using type = T; };
 
     template<typename T>
-    struct remove_reference<T&> { using type = T; };
+    struct _removeReference<T&> { using type = T; };
 
     template<typename T>
-    struct remove_reference<T&&> { using type = T; };
+    struct _removeReference<T&&> { using type = T; };
 
     template<typename T>
-    using remove_reference_t = typename remove_reference<T>::type;
+    using removeReference = typename _removeReference<T>::type;
 
     template<typename T>
-    struct add_lvalue_reference { using type = T&; };
+    struct _addLvalueReference { using type = T&; };
 
     template<typename T>
-    struct add_lvalue_reference<T&> { using type = T; };
+    struct _addLvalueReference<T&> { using type = T; };
 
     template<typename T>
-    using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+    using addLvalueReference = typename _addLvalueReference<T>::type;
 
     template<typename T>
-    struct add_rvalue_reference { using type = T&&; };
+    struct _addRValueReference { using type = T&&; };
 
     template<typename T>
-    struct add_rvalue_reference<T&&> { using type = T; };
+    struct _addRValueReference<T&&> { using type = T; };
 
     template<typename T>
-    using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+    using addRValueReference = typename _addRValueReference<T>::type;
 
     template<bool B, typename T = void>
-    struct enable_if {};
+    struct enableIf {};
 
     template<typename T>
-    struct enable_if<true, T> { using type = T; };
+    struct enableIf<true, T> { using type = T; };
 
     template<bool B, typename T = void>
-    using enable_if_t = typename enable_if<B, T>::type;
+    using enableIfT = typename enableIf<B, T>::type;
 
     template<class T, T v>
-    struct integral_constant {
+    struct integralConstant {
         static constexpr T value = v;
-        using value_type = T;
-        using type = integral_constant; 
-        constexpr operator value_type() const noexcept { return value; }
-        constexpr value_type operator()() const noexcept { return value; } 
+        using valueType = T;
+        using type = integralConstant; 
+        constexpr operator valueType() const noexcept { return value; }
+        constexpr valueType operator()() const noexcept { return value; } 
     };
 
     template<bool B>
-    using bool_constant = integral_constant<bool, B>;
+    using boolConstant = integralConstant<bool, B>;
 
-    using true_type = bool_constant<true>;
-    using false_type = bool_constant<false>;
+    using trueType = boolConstant<true>;
+    using falseType = boolConstant<false>;
     
     template<bool B, typename T, typename F>
-    struct conditional { using type = F; };
+    struct _conditional { using type = F; };
 
     template<typename T, typename F>
-    struct conditional<true, T, F> { using type = T; };
+    struct _conditional<true, T, F> { using type = T; };
 
     template<bool B, typename T, typename F>
-    using conditional_t = typename conditional<B, T, F>::type;
+    using conditional = typename _conditional<B, T, F>::type;
 
     template<typename... T>
-    using void_t = void;
+    using voidT = void;
 
     template<typename D, typename Void, template<typename...> class Op, typename... Args>
     struct detector {
@@ -97,22 +97,22 @@ namespace goose {
     };
 
     template<typename D, template<typename...> class Op, typename... Args>
-    struct detector<D, goose::void_t<Op<Args...>>, Op, Args...> {
+    struct detector<D, goose::voidT<Op<Args...>>, Op, Args...> {
         using type = Op<Args...>;
     };
     
     template<typename D, template<typename...> class Op, typename... Args>
-    using detected_or = detector<D, void, Op, Args...>;
+    using _detectedOr = detector<D, void, Op, Args...>;
     
     template<typename D, template<typename...> class Op, typename... Args>
-    using detected_or_t = typename detected_or<D, Op, Args...>::type;
+    using detectedOr = typename _detectedOr<D, Op, Args...>::type;
 
     template<typename T, typename U>
-    struct is_same : false_type {};
+    struct isSame : trueType {};
 
     template<typename T>
-    struct is_same<T, T> : true_type {};
+    struct isSame<T, T> : trueType {};
 
     template<typename T, typename U>
-    inline constexpr bool is_same_v = is_same<T, U>::value;
+    inline constexpr bool isSameV = isSame<T, U>::value;
 }

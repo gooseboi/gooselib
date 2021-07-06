@@ -14,6 +14,13 @@ namespace goose {
         a = temp;
     }
 
+    template<class T, typename U>
+    T exchange(T& obj, U&& newVal) noexcept {
+        T oldValue = std::move(obj);
+        obj = std::forward<U>(newVal);
+        return oldValue;
+    }  
+
     template<class T>
     addRValueReference<T> declval() noexcept;
 }

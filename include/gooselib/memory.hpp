@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <utility>
+#include <new>
 
 namespace goose {
     namespace _implementation {
@@ -56,6 +57,15 @@ namespace goose {
             using differenceType = detectedOr<std::ptrdiff_t, _differenceType, Ptr>;
             template<typename U>
             using rebind = typename _rebind<Ptr, U>::type;
+    };
+
+    template<typename T>
+    struct pointerTraits<T*> {
+            using pointer = T*;
+            using elementType = T;
+            using differenceType = std::ptrdiff_t;
+            template<typename U>
+            using rebind = U*;
     };
 
     template<typename T>
@@ -140,14 +150,14 @@ namespace goose {
                 if constexpr(_has_construct<T, Args...>::value) {
                     alloc.construct(ptr, std::forward<Args>(args)...); 
                 } else {
-                    construct_at(ptr, std::forward<Args>(args)...);
+                    constructAt(ptr, std::forward<Args>(args)...);
                 }
             }
             template<typename T> static void destroy(Alloc& alloc, T* ptr) { 
                 if constexpr(_has_destroy<T>::value) {
                     alloc.destroy(ptr); 
                 } else {
-                    destroy_at(ptr);
+                    destroyAt(ptr);
                 }
             }
     };

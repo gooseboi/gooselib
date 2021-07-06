@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace goose {
     template<typename T>
     struct _removeConst { using type = T; };

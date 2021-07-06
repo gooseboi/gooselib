@@ -48,14 +48,63 @@ namespace goose {
             End end() {
                 return m_end;
             }
+
+        static Range create(Begin begin, End end) noexcept { return {begin, end}; }
         private:
             Begin m_begin;
             End m_end;
     };
     
-    template<typename Begin, typename End = Begin>
-    Range<Begin, End> makeRange(Begin begin, End end) noexcept {
-        return {begin, end};
+    template<typename T, typename _Container >
+    struct genericIterator {
+        public:
+            using valueType = T;
+            using differenceType = std::ptrdiff_t;
+            using reference = T&;
+            using pointer = T*;
+            using iteratorCategory = goose::randomAccessIteratorTag;
+        public:
+            genericIterator() noexcept = default;
+            genericIterator(pointer _ptr) noexcept : mPtr{_ptr} {}
+
+        public:
+            genericIterator& operator++() { ++mPtr; return *this; }
+            genericIterator operator++(int) {
+                auto tmp = *this;
+                ++mPtr;
+                return tmp;
+            }
+
+            genericIterator& operator+=(differenceType n) { mPtr += n; return *this; }
+            genericIterator operator+(differenceType n) const { return {mPtr + n}; }
+            
+            genericIterator& operator--() { --mPtr; return *this; }
+            genericIterator operator--(int) {
+                auto tmp = *this;
+                --mPtr;
+                return tmp;
+            }
+
+            genericIterator& operator-=(differenceType n) { mPtr -= n; return *this; }
+            genericIterator operator-(differenceType n) const { return {mPtr - n}; }
+            differenceType operator-(genericIterator other) const { return {mPtr - other.mPtr}; }
+
+        public:
+            friend bool operator==(genericIterator lhs, genericIterator rhs) { return lhs.mPtr == rhs.mPtr; }
+
+            friend bool operator!=(genericIterator lhs, genericIterator rhs) { return !(lhs == rhs); }
+        public:
+            T& operator*() const { return *mPtr; }
+            T* operator->() const { return mPtr; }
+            T* ptr() const { return mPtr; }
+        private:            
+        T* mPtr;
+    };
+
+    template<typename T, typename _Container>
+    genericIterator<T, _Container> operator+(typename iteratorTraits<genericIterator<T, _Container>>::difference_type n, 
+                                             genericIterator<T, _Container> it) {
+        return it + n;
     }
 
     template<typename Iter>
@@ -164,6 +213,22 @@ namespace goose {
         private:
             Iter m_iter;
     };
-
+    template<class It>
+    typename iteratorTraits<It>::differenceType
+    distance(It first, It last) {
+        using category = typename iteratorTraits<It>::iteratorCategory;
+        static_assert(std::is_same_v<randomAccessIteratorTag, category>);
+    
+        if constexpr (std::is_base_of_v<randomAccessIteratorTag, category>)
+            return last - first;
+        else {
+            typename iteratorTraits<It>::differenceType result = 0;
+            while (first != last) {
+                ++first;
+                ++result;
+            }
+            return result;
+        }
+    }
     
 }
